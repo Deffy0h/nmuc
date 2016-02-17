@@ -19,13 +19,13 @@
 		use: nmuc.pl -help -get help
 		
 		
-dir - files and folders
-mkdir - create folder
-open - save file
-del - delete file or folder
-edit - edit a file
-create - create a file
-cls - clear terminal
-exit - exit terminal
-cmd - send terminal commands
+		dir - files and folders
+		mkdir - create folder
+		open - save file
+		del - delete file or folder
+		edit - edit a file
+		create - create a file
+		cls - clear terminal
+		exit - exit terminal
+		cmd - send terminal commands
 
